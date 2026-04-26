@@ -58,12 +58,16 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
+        const tg = window.Telegram && window.Telegram.WebApp;
         const btn = document.getElementById("send");
         const hint = document.getElementById("hint");
 
-        tg.ready();
-        tg.expand();
+        if (!tg) {
+            hint.textContent = "Telegram Web App API не загрузился.";
+        } else {
+            tg.ready();
+            tg.expand();
+        }
 
         btn.addEventListener("click", () => {
             const name = document.getElementById("name").value.trim();
@@ -76,13 +80,15 @@
 
             const payload = JSON.stringify({ name, phone });
 
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            if (tg && typeof tg.sendData === "function" && typeof tg.initData === "string" && tg.initData.length > 0) {
                 tg.sendData(payload);
                 tg.close();
                 return;
             }
 
-            hint.textContent = "Эта форма работает только внутри Telegram Web App.";
+            const platform = tg && tg.platform ? tg.platform : "unknown";
+            const initDataLength = tg && typeof tg.initData === "string" ? tg.initData.length : 0;
+            hint.textContent = `Mini App не передал initData. platform=${platform}, initDataLength=${initDataLength}`;
         });
     </script>
 </body>
