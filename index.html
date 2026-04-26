@@ -18,30 +18,19 @@
     <button id="send">Отправить данные</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Разворачиваем на все окно
+        const token = "ВАШ_ТОКЕН_БОТА";
+        const chatId = "ВАШ_ID"; // Кому придет уведомление
 
-        const btn = document.getElementById('send');
+        btn.addEventListener('click', async () => {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const text = `Новая заявка!\nИмя: ${name}\nТел: ${phone}`;
 
-        btn.addEventListener('click', () => {
-            try {
-                const name = document.getElementById('name').value;
-                const phone = document.getElementById('phone').value;
-
-                const data = JSON.stringify({ name, phone });
-
-                // Отправляем данные
-                tg.sendData(data);
-
-                // ПРИНУДИТЕЛЬНОЕ ЗАКРЫТИЕ (добавьте это)
-                setTimeout(() => {
-                    tg.close();
-                }, 100);
-
-            } catch (error) {
-                alert("Ошибка: " + error.message);
-            }
+            // Отправляем через обычный HTTPS запрос
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
+        
+            // Закрываем окно
+            tg.close();
         });
     </script>
 </body>
