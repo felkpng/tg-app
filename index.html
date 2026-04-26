@@ -80,7 +80,7 @@
 
             const payload = JSON.stringify({ name, phone });
 
-            if (tg && typeof tg.sendData === "function" && typeof tg.initData === "string" && tg.initData.length > 0) {
+            if (tg && typeof tg.sendData === "function") {
                 hint.textContent = "Отправляем заявку...";
                 btn.disabled = true;
                 tg.sendData(payload);
@@ -92,7 +92,7 @@
 
             const platform = tg && tg.platform ? tg.platform : "unknown";
             const initDataLength = tg && typeof tg.initData === "string" ? tg.initData.length : 0;
-            hint.textContent = `Mini App не передал initData. platform=${platform}, initDataLength=${initDataLength}`;
+            hint.textContent = `Telegram WebApp недоступен. platform=${platform}, initDataLength=${initDataLength}`;
         });
     </script>
 </body>
