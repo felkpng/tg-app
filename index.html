@@ -24,24 +24,23 @@
         const btn = document.getElementById('send');
 
         btn.addEventListener('click', () => {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
+            try {
+                const name = document.getElementById('name').value;
+                const phone = document.getElementById('phone').value;
 
-            if (!name || !phone) {
-                tg.showAlert("Пожалуйста, заполните все поля!");
-                return;
+                const data = JSON.stringify({ name, phone });
+
+                // Отправляем данные
+                tg.sendData(data);
+
+                // ПРИНУДИТЕЛЬНОЕ ЗАКРЫТИЕ (добавьте это)
+                setTimeout(() => {
+                    tg.close();
+                }, 100);
+
+            } catch (error) {
+                alert("Ошибка: " + error.message);
             }
-
-            const data = {
-                name: name,
-                phone: phone
-            };
-
-            // ГЛАВНЫЙ МОМЕНТ: отправка данных боту
-            // Данные должны быть строкой
-            tg.sendData(JSON.stringify(data));
-
-            // После выполнения sendData приложение автоматически закроется
         });
     </script>
 </body>
