@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Форма заказа</title>
+    <title>Передача показаний</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -11,49 +11,76 @@
         }
 
         body {
-            font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color, #f4f4f4);
-            color: var(--tg-theme-text-color, #111);
-            padding: 20px;
             margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+            background: var(--tg-theme-bg-color, #f4f4f4);
+            color: var(--tg-theme-text-color, #111);
         }
 
         .form {
-            max-width: 420px;
+            max-width: 440px;
             margin: 0 auto;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 6px;
+            font-size: 14px;
         }
 
         input,
         button {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: 1px solid #ccc;
             box-sizing: border-box;
+            padding: 12px;
+            border-radius: 10px;
             font-size: 16px;
         }
 
+        input {
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
         button {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #fff);
+            margin-top: 18px;
             border: none;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #fff);
         }
 
         .hint {
+            min-height: 20px;
+            margin-top: 12px;
             font-size: 14px;
-            opacity: 0.8;
+            opacity: 0.85;
         }
     </style>
 </head>
 <body>
     <div class="form">
-        <h3>Оформить заявку</h3>
-        <input type="text" id="name" placeholder="Ваше имя" autocomplete="name">
-        <input type="tel" id="phone" placeholder="Номер телефона" autocomplete="tel">
-        <button id="send" type="button">Отправить данные</button>
+        <h3>Передача показаний</h3>
+
+        <label for="hv1">Холодное водоснабжение (хв1)</label>
+        <input type="text" id="hv1" inputmode="decimal" autocomplete="off">
+
+        <label for="hv2">Холодное водоснабжение (хв2)</label>
+        <input type="text" id="hv2" inputmode="decimal" autocomplete="off">
+
+        <label for="gv1">Горячее водоснабжение (гв1)</label>
+        <input type="text" id="gv1" inputmode="decimal" autocomplete="off">
+
+        <label for="gv2">Горячее водоснабжение (гв2)</label>
+        <input type="text" id="gv2" inputmode="decimal" autocomplete="off">
+
+        <button id="send" type="button">Отправить показания</button>
         <p class="hint" id="hint"></p>
     </div>
 
@@ -61,38 +88,44 @@
         const tg = window.Telegram && window.Telegram.WebApp;
         const btn = document.getElementById("send");
         const hint = document.getElementById("hint");
+        const fields = ["hv1", "hv2", "gv1", "gv2"];
 
-        if (!tg) {
-            hint.textContent = "Telegram Web App API не загрузился.";
-        } else {
+        if (tg) {
             tg.ready();
             tg.expand();
+        } else {
+            hint.textContent = "Telegram WebApp API не загрузился.";
+        }
+
+        function getValue(id) {
+            return document.getElementById(id).value.trim();
         }
 
         btn.addEventListener("click", () => {
-            const name = document.getElementById("name").value.trim();
-            const phone = document.getElementById("phone").value.trim();
+            const payload = {
+                hv1: getValue("hv1"),
+                hv2: getValue("hv2"),
+                gv1: getValue("gv1"),
+                gv2: getValue("gv2")
+            };
 
-            if (!name || !phone) {
-                hint.textContent = "Заполните имя и телефон.";
+            const hasEmptyField = fields.some((field) => !payload[field]);
+            if (hasEmptyField) {
+                hint.textContent = "Заполните все 4 поля.";
                 return;
             }
 
-            const payload = JSON.stringify({ name, phone });
-
-            if (tg && typeof tg.sendData === "function") {
-                hint.textContent = "Отправляем заявку...";
-                btn.disabled = true;
-                tg.sendData(payload);
-                window.setTimeout(() => {
-                    tg.close();
-                }, 500);
+            if (!tg || typeof tg.sendData !== "function") {
+                hint.textContent = "Telegram WebApp недоступен.";
                 return;
             }
 
-            const platform = tg && tg.platform ? tg.platform : "unknown";
-            const initDataLength = tg && typeof tg.initData === "string" ? tg.initData.length : 0;
-            hint.textContent = `Telegram WebApp недоступен. platform=${platform}, initDataLength=${initDataLength}`;
+            hint.textContent = "Отправляем показания...";
+            btn.disabled = true;
+            tg.sendData(JSON.stringify(payload));
+            window.setTimeout(() => {
+                tg.close();
+            }, 500);
         });
     </script>
 </body>
