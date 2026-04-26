@@ -81,8 +81,12 @@
             const payload = JSON.stringify({ name, phone });
 
             if (tg && typeof tg.sendData === "function" && typeof tg.initData === "string" && tg.initData.length > 0) {
+                hint.textContent = "Отправляем заявку...";
+                btn.disabled = true;
                 tg.sendData(payload);
-                tg.close();
+                window.setTimeout(() => {
+                    tg.close();
+                }, 500);
                 return;
             }
 
